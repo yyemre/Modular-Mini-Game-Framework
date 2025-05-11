@@ -17,6 +17,8 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
+            _game.EnableStartScreen();
+            Debug.Log("Game State: Ready");
             // UIManager.Instance.ShowStartPrompt(() =>
             // {
             //     _fsm.ChangeState(RunnerState.Countdown);
@@ -26,6 +28,7 @@ namespace MiniGames.EndlessRunner
         public void Tick() { }
         public void Exit()
         {
+            _game.DisableStartScreen();
             // UIManager.Instance.HideStartPrompt();
         }
     }

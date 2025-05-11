@@ -17,9 +17,10 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
-            // _game.GetRunner().DisableControl();
+            Debug.Log("Game State: Crashed");
+            _game.GetCharacter().DisableControl();
             // _game.GetSpawner().StopSpawning();
-            // _game.StartCoroutine(WaitAndGoToGameOver());
+            _game.StartCoroutine(WaitAndGoToGameOver());
         }
 
         private IEnumerator WaitAndGoToGameOver()

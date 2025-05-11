@@ -17,6 +17,7 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
+            Debug.Log("Game State: Loading");
             // _game.GetSpawner().Prepare();
             // _game.GetRunner().DisableControl();
             // _game.GetScoreManager().ResetScore();

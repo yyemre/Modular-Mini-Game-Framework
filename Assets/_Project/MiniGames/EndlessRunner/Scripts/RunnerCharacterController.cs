@@ -1,20 +1,21 @@
-﻿using UnityEngine;
+﻿using MiniGames.EndlessRunner;
+using UnityEngine;
 
-/// <summary>
-/// Endless Runner karakter kontrolü: zıplama, kayma, lane değiştirme gibi tüm mekanikleri içerir.
-/// </summary>
-[RequireComponent(typeof(CharacterController))] // Unity'nin CharacterController bileşeni (fizik değil)
-public class CharacterController : MonoBehaviour
+
+[RequireComponent(typeof(CharacterController))]
+public class RunnerCharacterController : MonoBehaviour
 {
     [Header("Controls")]
     public float jumpLength = 2.0f; 
     public float jumpHeight = 1.2f; 
     public float laneOffset = 1.0f; 
+    public float laneChangeSpeed = 1.0f;
     public float slideLength = 2.0f;
-
+    
     public float minSpeed = 5.0f;
     public float maxSpeed = 10.0f;
-
+    public float acceleration = .1f;
+    
     protected int m_CurrentLane = 1;
     protected Vector3 m_TargetPosition = Vector3.zero;
 
@@ -33,10 +34,8 @@ public class CharacterController : MonoBehaviour
     protected Vector3 m_MoveDirection = Vector3.zero;
     protected UnityEngine.CharacterController m_Controller;
 
-#if !UNITY_STANDALONE
     protected Vector2 m_StartingTouch;
     protected bool m_IsSwiping = false;
-#endif
 
     public float speed => m_Speed;
     public float speedRatio => (m_Speed - minSpeed) / (maxSpeed - minSpeed);
@@ -48,12 +47,10 @@ public class CharacterController : MonoBehaviour
     {
         m_Controller = GetComponent<UnityEngine.CharacterController>();
     }
-
     private void Start()
     {
         m_Speed = minSpeed;
     }
-
     private void Update()
     {
         if (!m_IsMoving) return;
@@ -63,14 +60,17 @@ public class CharacterController : MonoBehaviour
         float scaledSpeed = m_Speed * Time.deltaTime;
         Vector3 currentPosition = transform.position;
         
-        Vector3 desiredPosition = new Vector3(m_TargetPosition.x, currentPosition.y, currentPosition.z + scaledSpeed);
+        float targetX = m_TargetPosition.x;
+        float smoothedX = Mathf.Lerp(currentPosition.x, targetX, Time.deltaTime * laneChangeSpeed);
+        
+        Vector3 desiredPosition = new Vector3(smoothedX, currentPosition.y, currentPosition.z + scaledSpeed);
         
         if (m_Jumping)
         {
             float jumpProgress = (currentPosition.z - m_JumpStart) / (jumpLength * (1.0f + speedRatio));
             if (jumpProgress >= 1.0f)
             {
-                m_Jumping = false;
+                StopJumping();
             }
             else
             {
@@ -80,20 +80,15 @@ public class CharacterController : MonoBehaviour
         
         if (m_Sliding && currentPosition.z - m_SlideStart > slideLength)
         {
-            m_Sliding = false;
+            StopSliding();
         }
-
+        
         m_Controller.Move(desiredPosition - currentPosition);
+        
+        m_Speed += acceleration * Time.deltaTime;
     }
-
     private void HandleInput()
     {
-#if UNITY_STANDALONE || UNITY_WEBGL
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) ChangeLane(-1);
-        else if (Input.GetKeyDown(KeyCode.RightArrow)) ChangeLane(1);
-        else if (Input.GetKeyDown(KeyCode.UpArrow)) Jump();
-        else if (Input.GetKeyDown(KeyCode.DownArrow)) Slide();
-#else
         if (Input.touchCount == 1)
         {
             if (m_IsSwiping)
@@ -128,11 +123,10 @@ public class CharacterController : MonoBehaviour
                 m_IsSwiping = false;
             }
         }
-#endif
     }
-
     public void Jump()
     {
+        Debug.Log("Jump");
         if (!m_IsRunning || m_Jumping) return;
 
         if (m_Sliding) StopSliding();
@@ -141,19 +135,22 @@ public class CharacterController : MonoBehaviour
         m_JumpStart = transform.position.z;
         m_Jumping = true;
     }
-
     public void Slide()
     {
+        Debug.Log("Slide");
         if (!m_IsRunning || m_Sliding) return;
 
         if (m_Jumping) StopJumping();
 
         m_Sliding = true;
         m_SlideStart = transform.position.z;
+        HandleCollider();
     }
-
     public void ChangeLane(int direction)
     {
+        Debug.Log(direction == 1 ? "Right" : "Left");
+        Debug.Log("target lane: " + (m_CurrentLane + direction));
+        
         if (!m_IsRunning) return;
 
         int targetLane = m_CurrentLane + direction;
@@ -162,9 +159,27 @@ public class CharacterController : MonoBehaviour
         m_CurrentLane = targetLane;
         m_TargetPosition = new Vector3((m_CurrentLane - 1) * laneOffset, 0, 0);
     }
-
     public void StopJumping() => m_Jumping = false;
-    public void StopSliding() => m_Sliding = false;
+
+    public void StopSliding()
+    {
+        m_Sliding = false;
+        HandleCollider();
+    }
+
+    private void HandleCollider()
+    {
+        if (m_Sliding)
+        {
+            m_Controller.height = 1.0f;
+            m_Controller.center = new Vector3(0, 0.5f, 0);
+        }
+        else
+        {
+            m_Controller.height = 2.0f;
+            m_Controller.center = new Vector3(0, 1f, 0);
+        }
+    }
 
     public void EnableControl()
     {
@@ -179,12 +194,26 @@ public class CharacterController : MonoBehaviour
         StopJumping();
         StopSliding();
     }
-
+    
+    // TODO: Event system
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (!m_IsInvincible && hit.gameObject.CompareTag("Obstacle"))
         {
-            // FindObjectOfType<RunnerGame>()?.OnDeath();
+            FindObjectOfType<RunnerGame>()?.OnDeath();
         }
+        if (hit.gameObject.TryGetComponent(out Coin coin))
+        {
+            coin.Collect();
+        }
+    }
+    public void ResetSpeed()
+    {
+        m_Speed = minSpeed;
+    }
+
+    public void ResetPosisition()
+    {
+        transform.position = new Vector3(0, 0, 0);
     }
 }

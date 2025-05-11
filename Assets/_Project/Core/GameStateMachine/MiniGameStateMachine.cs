@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Core.GameStateMachine
 {
@@ -7,7 +8,7 @@ namespace Core.GameStateMachine
     {
         private readonly Dictionary<T, IMiniGameState> _states = new();
         private IMiniGameState _currentState;
-
+        
         public T CurrentKey { get; private set; }
 
         public void RegisterState(T key, IMiniGameState state)
@@ -21,6 +22,7 @@ namespace Core.GameStateMachine
             {
                 throw new InvalidOperationException($"State '{key}' not registered.");
             }
+            if(_currentState == _states[key]) return;
 
             _currentState?.Exit();
             _currentState = _states[key];

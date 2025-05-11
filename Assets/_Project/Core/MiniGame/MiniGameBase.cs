@@ -8,7 +8,11 @@ namespace Core.MiniGame
     public abstract class MiniGameBase<TState> : MonoBehaviour where TState : Enum
     {
         protected MiniGameStateMachine<TState> _stateMachine;
-
+        
+        public void ShowCurrentState()
+        {
+            Debug.Log($"Current FSM State: {_stateMachine.CurrentKey.ToString()}");
+        }
         protected virtual void Start()
         {
             _stateMachine = new MiniGameStateMachine<TState>();

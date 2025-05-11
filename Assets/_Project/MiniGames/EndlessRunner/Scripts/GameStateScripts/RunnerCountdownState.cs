@@ -17,14 +17,29 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
-            // UIManager.Instance.ShowCountdown(() =>
-            // {
-            //     _fsm.ChangeState(RunnerState.Playing);
-            // });
+            _game.EnableCoundownScreen();
+            Debug.Log("Game State: CountDown");
+            Debug.Log("Countdown started...");
+            _game.StartCoroutine(CountdownRoutine());
+        }
+
+        private IEnumerator CountdownRoutine()
+        {
+            _game.SetCountDown(3);
+            yield return new WaitForSeconds(1f);
+            _game.SetCountDown(2);
+            yield return new WaitForSeconds(1f);
+            _game.SetCountDown(1);
+            yield return new WaitForSeconds(1f);
+            _fsm.ChangeState(RunnerState.Playing);
         }
 
         public void Tick() { }
-        public void Exit() { }
+
+        public void Exit()
+        {
+            _game.DisableCoundownScreen();
+        }
     }
 
 }

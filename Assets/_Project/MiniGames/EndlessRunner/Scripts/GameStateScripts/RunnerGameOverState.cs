@@ -15,6 +15,11 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
+            Debug.Log("Game State: GameOver");
+            _game.EnableGameOverScreen();
+            
+            // TODO: score yazılacak
+            
             // var score = _game.GetScoreManager().CurrentScore;
             // GameManager.Instance.SaveSystem.Save("runner_score", score);
             //
@@ -22,7 +27,11 @@ namespace MiniGames.EndlessRunner
         }
 
         public void Tick() { }
-        public void Exit() { }
+
+        public void Exit()
+        {
+            _game.DisableGameOverScreen();
+        }
     }
 
 }
