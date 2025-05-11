@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using Core.GameStateMachine;
 
-namespace Core
+namespace Core.MiniGame
 {
     public abstract class MiniGameBase<TState> : MonoBehaviour where TState : Enum
     {

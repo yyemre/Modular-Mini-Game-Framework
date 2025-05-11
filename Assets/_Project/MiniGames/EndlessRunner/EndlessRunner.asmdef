@@ -1,0 +1,16 @@
+{
+    "name": "EndlessRunner",
+    "rootNamespace": "",
+    "references": [
+        "GUID:718653a2cdc39ad458bdd809649ba388"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
