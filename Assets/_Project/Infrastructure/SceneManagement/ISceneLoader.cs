@@ -1,9 +1,10 @@
 ﻿using System;
+using Infrastructure.AssetManagement;
 
 namespace Infrastructure.SceneManagement
 {
     public interface ISceneLoader
     {
-        void LoadSceneAsync(string sceneName, Action onComplete = null);
+        void LoadSceneAsync(SceneReference sceneRef, Action onComplete = null);
     }
 }

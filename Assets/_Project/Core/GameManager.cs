@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Infrastructure.AssetManagement;
+using UnityEngine;
 using Infrastructure.SceneManagement;
 
 namespace Core
@@ -9,6 +10,8 @@ namespace Core
         
         // TODO: DI
         [SerializeField] private SceneLoader loader;
+        [SerializeField] private SceneReference runnerScene;
+        [SerializeField] private SceneReference mainMenuScene;
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -21,15 +24,16 @@ namespace Core
             DontDestroyOnLoad(gameObject);
         }
 
+        // TODO : daha modüler olacak. SO ile yönetilecek.
         public void PlayRunner()
         {
-            loader.LoadSceneAsync("EndlessRunnerGameplay");
+            loader.LoadSceneAsync(runnerScene);
         }
         
         [ContextMenu("Return to Main Menu")]
         public void ReturnToMainMenu()
         {
-            loader.LoadSceneAsync("MainMenu");
+            loader.LoadSceneAsync(mainMenuScene);
         }
     }
 }

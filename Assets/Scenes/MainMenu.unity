@@ -540,6 +540,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loader: {fileID: 1866847617}
+  runnerScene: {fileID: 11400000, guid: cb0d38864e59e4d4a9fd15c60e2b4c60, type: 2}
+  mainMenuScene: {fileID: 11400000, guid: 8215f8c09e99b954e8c5e7a596867ea0, type: 2}
 --- !u!4 &757758236
 Transform:
   m_ObjectHideFlags: 0
