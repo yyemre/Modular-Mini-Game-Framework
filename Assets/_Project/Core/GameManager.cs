@@ -4,6 +4,7 @@ using Infrastructure.AssetManagement;
 using UnityEngine;
 using Infrastructure.SceneManagement;
 using Zenject;
+using UI;
 
 namespace Core
 {
@@ -12,13 +13,15 @@ namespace Core
         private ISceneLoader _loader;
         private SceneCatalog _sceneCatalog;
         private IEventBus _eventBus;
+        private UIManager _uiManager;
 
         [Inject]
-        public void Construct(ISceneLoader sceneLoader, SceneCatalog catalog, IEventBus eventBus)
+        public void Construct(ISceneLoader sceneLoader, SceneCatalog catalog, IEventBus eventBus, UIManager uiManager)
         {
             _loader = sceneLoader;
             _sceneCatalog = catalog;
             _eventBus = eventBus;
+            _uiManager = uiManager;
         }
         
         private void Start()
@@ -29,8 +32,7 @@ namespace Core
         private IEnumerator LoadMainMenuNextFrame()
         {
             yield return null;
-            var menuScene = _sceneCatalog.GetSceneById("MainMenu");
-            _loader.LoadSceneAsync(menuScene);
+            OnLoadScene(new LoadSceneEvent("MainMenu"));
         }
 
         private void OnEnable()
@@ -52,7 +54,11 @@ namespace Core
                 return;
             }
 
-            _loader.LoadSceneAsync(scene);
+            _loader.LoadSceneAsync(scene, () =>
+            {
+                _uiManager.HideAll();
+                _uiManager.ShowPanel(e.SceneId);
+            });
         }
     }
 }

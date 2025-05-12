@@ -1,9 +1,10 @@
 {
-    "name": "Core",
+    "name": "Messages",
     "rootNamespace": "",
     "references": [
-        "GUID:86a28efa30254f33930b0e966ab4fc3f",
-        "GUID:7a9d864926eded24da9a11228d90237d"
+        "GUID:7a9d864926eded24da9a11228d90237d",
+        "GUID:718653a2cdc39ad458bdd809649ba388",
+        "GUID:86a28efa30254f33930b0e966ab4fc3f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
