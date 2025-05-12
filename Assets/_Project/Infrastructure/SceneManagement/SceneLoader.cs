@@ -12,18 +12,6 @@ namespace Infrastructure.SceneManagement
     public class SceneLoader : MonoBehaviour, ISceneLoader
     {
         [SerializeField] private DefaultLoadingScreen loadingScreen;
-        public static SceneLoader Instance { get; private set; }
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Instance = this;
-            DontDestroyOnLoad(this.gameObject);
-        }
 
         public void LoadSceneAsync(SceneReference sceneRef, Action onComplete = null)
         {

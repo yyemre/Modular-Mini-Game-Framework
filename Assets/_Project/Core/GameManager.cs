@@ -1,39 +1,58 @@
-﻿using Infrastructure.AssetManagement;
+﻿using System.Collections;
+using Core.EventSystem;
+using Infrastructure.AssetManagement;
 using UnityEngine;
 using Infrastructure.SceneManagement;
+using Zenject;
 
 namespace Core
 {
     public class GameManager : MonoBehaviour
     {
-        public static GameManager Instance { get; private set; }
-        
-        // TODO: DI
-        [SerializeField] private SceneLoader loader;
-        [SerializeField] private SceneReference runnerScene;
-        [SerializeField] private SceneReference mainMenuScene;
-        private void Awake()
+        private ISceneLoader _loader;
+        private SceneCatalog _sceneCatalog;
+        private IEventBus _eventBus;
+
+        [Inject]
+        public void Construct(ISceneLoader sceneLoader, SceneCatalog catalog, IEventBus eventBus)
         {
-            if (Instance != null && Instance != this)
+            _loader = sceneLoader;
+            _sceneCatalog = catalog;
+            _eventBus = eventBus;
+        }
+        
+        private void Start()
+        {
+            StartCoroutine(LoadMainMenuNextFrame());
+        }
+
+        private IEnumerator LoadMainMenuNextFrame()
+        {
+            yield return null;
+            var menuScene = _sceneCatalog.GetSceneById("MainMenu");
+            _loader.LoadSceneAsync(menuScene);
+        }
+
+        private void OnEnable()
+        {
+            _eventBus.Subscribe<LoadSceneEvent>(OnLoadScene);
+        }
+
+        private void OnDisable()
+        {
+            _eventBus.Unsubscribe<LoadSceneEvent>(OnLoadScene);
+        }
+
+        private void OnLoadScene(LoadSceneEvent e)
+        {
+            var scene = _sceneCatalog.GetSceneById(e.SceneId);
+            if (scene == null)
             {
-                Destroy(gameObject);
+                Debug.LogError($"Scene with ID '{e.SceneId}' not found!");
                 return;
             }
 
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        // TODO : daha modüler olacak. SO ile yönetilecek.
-        public void PlayRunner()
-        {
-            loader.LoadSceneAsync(runnerScene);
-        }
-        
-        [ContextMenu("Return to Main Menu")]
-        public void ReturnToMainMenu()
-        {
-            loader.LoadSceneAsync(mainMenuScene);
+            _loader.LoadSceneAsync(scene);
         }
     }
 }

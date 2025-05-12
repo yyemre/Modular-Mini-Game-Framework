@@ -59,7 +59,7 @@ GameObject:
   - component: {fileID: 8315432159277562374}
   - component: {fileID: 3863132640932086114}
   m_Layer: 0
-  m_Name: Sceneloader
+  m_Name: SceneLoader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
