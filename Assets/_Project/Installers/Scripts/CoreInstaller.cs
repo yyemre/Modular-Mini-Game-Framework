@@ -1,5 +1,6 @@
 using Core;
 using Core.EventSystem;
+using Infrastructure.SaveSystem;
 using Infrastructure.AssetManagement;
 using Infrastructure.SceneManagement;
 using UnityEngine;
@@ -9,7 +10,6 @@ public class CoreInstaller : MonoInstaller
     [SerializeField] private SceneCatalog sceneCatalog;
     [SerializeField] private GameObject gameManagerPrefab;
     [SerializeField] private GameObject sceneLoaderPrefab;
-    
     
     public override void InstallBindings()
     {
@@ -26,5 +26,8 @@ public class CoreInstaller : MonoInstaller
             .FromComponentInNewPrefab(gameManagerPrefab)
             .AsSingle()
             .NonLazy();
+        Container.Bind<ISaveSystem>()
+            .To<PlayerPrefsSaveSystem>()
+            .AsSingle();
     }
 }
