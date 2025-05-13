@@ -1,5 +1,6 @@
 ﻿using MiniGames.EndlessRunner;
 using UnityEngine;
+using Zenject;
 
 [RequireComponent(typeof(CharacterController))]
 public class RunnerCharacterController : MonoBehaviour
@@ -14,6 +15,8 @@ public class RunnerCharacterController : MonoBehaviour
     [SerializeField] private float minSpeed = 5.0f;
     [SerializeField] private float maxSpeed = 10.0f;
     [SerializeField] private float acceleration = .1f;
+
+    [SerializeField] private GameObject SlidingCube, NormalCube;
 
     private int _currentLane = 1;
     private Vector3 _targetPosition;
@@ -171,6 +174,18 @@ public class RunnerCharacterController : MonoBehaviour
     {
         _controller.height = forSlide ? 1.0f : 2.0f;
         _controller.center = new Vector3(0, forSlide ? 0.5f : 1.0f, 0);
+
+        if (forSlide)
+        {
+            SlidingCube.SetActive(true);
+            NormalCube.SetActive(false);
+        }
+        else
+        {
+            SlidingCube.SetActive(false);
+            NormalCube.SetActive(true);
+        }
+        
     }
 
     public void EnableControl()
