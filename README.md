@@ -5,7 +5,7 @@ Bu proje, farklı türde mini oyunlar eklenebilecek şekilde tasarlanmış **mod
 
 ---
 
-##  Mimarisi
+## Mimarisi
 
 Proje katmanlı bir mimari yapıda tasarlanmıştır.
 
@@ -53,7 +53,7 @@ Installers katmanı, Zenject üzerinden tüm sistemlerin bağlandığı yerdir. 
 
 ---
 
-##  Bilinen Problemler
+## Bilinen Problemler
 
 - Save system player prefsten güvenli bir sisteme taşınmalı.
 - Runner game hareket mekaniğinde buglar var.
@@ -68,7 +68,7 @@ Installers katmanı, Zenject üzerinden tüm sistemlerin bağlandığı yerdir. 
 
 ---
 
-## 🚀 Gelecekteki Geliştirmeler
+## Gelecekteki Geliştirmeler
 
 - FSM yapısı geliştirilebilir. FSM state geçişleri Async yapılıp geçişlerdeki yük dağıtılabilir.
 - UI Management sistemi iyileştirilip işlevselliği artırılabilir.
