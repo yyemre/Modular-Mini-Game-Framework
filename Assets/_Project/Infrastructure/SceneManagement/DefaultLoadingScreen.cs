@@ -7,22 +7,23 @@ namespace Infrastructure.SceneManagement
     {
         [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private float fadeDuration = 0.5f;
-        [SerializeField] private UnityEngine.UI.Image progressBar;
+        [SerializeField] private UnityEngine.UI.Slider progressBar;
+        [SerializeField] private UnityEngine.UI.Image alternativeProgressBar;
 
-        public virtual void Show()
+        public IEnumerator FadeIn()
         {
             gameObject.SetActive(true);
-            StopAllCoroutines();
-            StartCoroutine(Fade(1));
+            yield return StartCoroutine(Fade(1f));
+            canvasGroup.blocksRaycasts = true;
         }
 
-        public virtual void Hide()
+        public IEnumerator FadeOut()
         {
-            StopAllCoroutines();
-            StartCoroutine(Fade(0));
+            yield return StartCoroutine(Fade(0f));
+            canvasGroup.blocksRaycasts = false;
+            gameObject.SetActive(false);
         }
         
-
         private IEnumerator Fade(float targetAlpha)
         {
             float startAlpha = canvasGroup.alpha;
@@ -31,7 +32,8 @@ namespace Infrastructure.SceneManagement
             while (elapsed < fadeDuration)
             {
                 elapsed += Time.deltaTime;
-                canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / fadeDuration);
+                float t = Mathf.Clamp01(elapsed / fadeDuration);
+                canvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
                 yield return null;
             }
 
@@ -40,8 +42,10 @@ namespace Infrastructure.SceneManagement
         }
         public void SetProgress(float progress)
         {
+            if (alternativeProgressBar != null)
+                alternativeProgressBar.fillAmount = Mathf.Clamp01(progress);
             if (progressBar != null)
-                progressBar.fillAmount = Mathf.Clamp01(progress);
+                progressBar.value = Mathf.Clamp01(progress);
         }
     }
 }

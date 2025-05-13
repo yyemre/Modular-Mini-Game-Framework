@@ -3,7 +3,12 @@
     public struct LoadSceneEvent
     {
         public string SceneId;
-        public LoadSceneEvent(string sceneId) => SceneId = sceneId;
+        public bool ShowLoading;
+        public LoadSceneEvent(string sceneId, bool showLoading = true)
+        {
+            SceneId = sceneId;
+            ShowLoading = showLoading;
+        }
     }
 
 }

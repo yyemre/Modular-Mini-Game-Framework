@@ -1,8 +1,10 @@
-﻿namespace Infrastructure.SceneManagement
+﻿using System.Collections;
+
+namespace Infrastructure.SceneManagement
 {
     public interface ILoadingScreen
     {
-        void Show();
-        void Hide();
+        IEnumerator  FadeIn();
+        IEnumerator  FadeOut();
     }
 }

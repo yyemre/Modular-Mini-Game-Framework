@@ -5,6 +5,7 @@ using UnityEngine;
 using Infrastructure.SceneManagement;
 using Zenject;
 using UI;
+using UnityEngine.TextCore.Text;
 
 namespace Core
 {
@@ -32,7 +33,7 @@ namespace Core
         private IEnumerator LoadMainMenuNextFrame()
         {
             yield return null;
-            OnLoadScene(new LoadSceneEvent("MainMenu"));
+            OnLoadScene(new LoadSceneEvent("MainMenu", false));
         }
 
         private void OnEnable()
@@ -54,7 +55,7 @@ namespace Core
                 return;
             }
 
-            _loader.LoadSceneAsync(scene, () =>
+            _loader.LoadSceneAsync(scene, e.ShowLoading,() =>
             {
                 _uiManager.HideAll();
                 _uiManager.ShowPanel(e.SceneId);

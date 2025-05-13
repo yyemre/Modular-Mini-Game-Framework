@@ -13,40 +13,30 @@ namespace Infrastructure.SceneManagement
     {
         [SerializeField] private DefaultLoadingScreen loadingScreen;
 
-        public void LoadSceneAsync(SceneReference sceneRef, Action onComplete = null)
+        public void LoadSceneAsync(SceneReference sceneRef, bool showLoading = true, Action onComplete = null)
         {
-            StartCoroutine(LoadRoutine(sceneRef, onComplete));
+            StartCoroutine(LoadRoutine(sceneRef, showLoading, onComplete));
         }
 
-        private IEnumerator LoadRoutine(SceneReference sceneRef, Action onComplete = null)
+        private IEnumerator LoadRoutine(SceneReference sceneRef, bool showLoading = true, Action onComplete = null)
         {
-            loadingScreen?.Show();
-            AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(sceneRef.sceneReference, LoadSceneMode.Single);
-            handle.Completed += (op) =>
+            if (showLoading) yield return loadingScreen?.FadeIn();
+
+            AsyncOperationHandle<SceneInstance> handle = Addressables.LoadSceneAsync(
+                sceneRef.sceneReference,
+                LoadSceneMode.Single
+            );
+            if (showLoading)
             {
-                loadingScreen?.Hide();
-                onComplete?.Invoke();
-            };
-            
-            // AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
-            // op.allowSceneActivation = false;
-            // float fakeProgress = 0f;
-            // while (op.progress < 0.9f)
-            //  // while (fakeProgress < 0.9f)
-            // {
-            //     loadingScreen?.SetProgress(op.progress);
-            //     fakeProgress += Time.deltaTime;
-            //     yield return null;
-            // }
-            //
-            // loadingScreen?.SetProgress(1f);
-            //
-            // yield return new WaitForSeconds(0.6f);
-            // op.allowSceneActivation = true;
-            //
-            // loadingScreen?.Hide();
-            // onComplete?.Invoke();
-            yield return handle;
+                while (!handle.IsDone)
+                {
+                    loadingScreen?.SetProgress(handle.PercentComplete);
+                    yield return null;
+                }
+            }
+
+            if (showLoading) yield return loadingScreen?.FadeOut();
+            onComplete?.Invoke();
         }
     }
 
