@@ -17,22 +17,20 @@ namespace MiniGames.EndlessRunner
 
         public void Enter()
         {
-            Debug.Log("Game State: Loading");
-            // _game.GetSpawner().Prepare();
-            // _game.GetRunner().DisableControl();
-            // _game.GetScoreManager().ResetScore();
-
-            _game.StartCoroutine(WaitAndProceed());
+            Debug.Log("State: Loading");
+            _game.StartCoroutine(Delay());
         }
 
-        private IEnumerator WaitAndProceed()
+        private IEnumerator Delay()
         {
             yield return new WaitForSeconds(1f);
             _fsm.ChangeState(RunnerState.Ready);
         }
 
         public void Tick() { }
+
         public void Exit() { }
     }
+
 
 }

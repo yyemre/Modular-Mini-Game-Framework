@@ -15,3 +15,15 @@ MonoBehaviour:
   panels:
   - id: MainMenu
     prefab: {fileID: 4871383367086584781, guid: c4362cd0d8efa9742931141d825dd99f, type: 3}
+  - id: StartScreen
+    prefab: {fileID: 3538813740586970015, guid: 1859ce3557537e34390e113f562a74b6, type: 3}
+  - id: ReadyScreen
+    prefab: {fileID: 4652843980906258089, guid: ac64549554a1b4d4eadea3eca6d59d79, type: 3}
+  - id: ReadyScreen
+    prefab: {fileID: 4652843980906258089, guid: ac64549554a1b4d4eadea3eca6d59d79, type: 3}
+  - id: CountdownScreen
+    prefab: {fileID: 9075327645690668760, guid: 66054cf0d228a98419c92f971a484d72, type: 3}
+  - id: PlayingScreen
+    prefab: {fileID: 6581947451131654420, guid: 60334302f32a78f46b483c4e1afda15a, type: 3}
+  - id: GameOverScreen
+    prefab: {fileID: 9215153584445705054, guid: 6504c05951cd95e469bb8db7c9b7453c, type: 3}

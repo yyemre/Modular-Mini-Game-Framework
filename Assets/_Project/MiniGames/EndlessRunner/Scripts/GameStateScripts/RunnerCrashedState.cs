@@ -11,29 +11,31 @@ namespace MiniGames.EndlessRunner
         private readonly RunnerGame _game;
         private readonly IEventBus _eventBus;
 
-        public RunnerCrashedState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game, IEventBus EventBus)
+        public RunnerCrashedState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game, IEventBus eventBus)
         {
             _fsm = fsm;
             _game = game;
-            _eventBus = EventBus;
+            _eventBus = eventBus;
         }
 
         public void Enter()
         {
-            Debug.Log("Game State: Crashed");
-            _eventBus.Publish(new ScoreSavingEvent());
+            Debug.Log("State: Crashed");
             _game.GetCharacter().DisableControl();
-            _game.StartCoroutine(WaitAndGoToGameOver());
+            _eventBus.Publish(new ScoreSavingEvent());
+            _game.StartCoroutine(DelayToGameOver());
         }
 
-        private IEnumerator WaitAndGoToGameOver()
+        private IEnumerator DelayToGameOver()
         {
             yield return new WaitForSeconds(1.5f);
             _fsm.ChangeState(RunnerState.GameOver);
         }
 
         public void Tick() { }
+
         public void Exit() { }
     }
+
 
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Core.GameStateMachine;
+using UI;
 using UnityEngine;
 
 namespace MiniGames.EndlessRunner
@@ -8,29 +9,30 @@ namespace MiniGames.EndlessRunner
     {
         private readonly MiniGameStateMachine<RunnerState> _fsm;
         private readonly RunnerGame _game;
+        private readonly UIManager _ui;
 
-        public RunnerCountdownState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game)
+        public RunnerCountdownState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game, UIManager ui)
         {
             _fsm = fsm;
             _game = game;
+            _ui = ui;
         }
 
         public void Enter()
         {
-            _game.EnableCoundownScreen();
-            Debug.Log("Game State: CountDown");
-            Debug.Log("Countdown started...");
+            Debug.Log("State: Countdown");
+            _ui.ShowPanel("CountdownScreen");
             _game.StartCoroutine(CountdownRoutine());
         }
 
         private IEnumerator CountdownRoutine()
         {
-            _game.SetCountDown(3);
-            yield return new WaitForSeconds(1f);
-            _game.SetCountDown(2);
-            yield return new WaitForSeconds(1f);
-            _game.SetCountDown(1);
-            yield return new WaitForSeconds(1f);
+            for (int i = 3; i > 0; i--)
+            {
+                // _ui.UpdateText("CountdownText", i.ToString());
+                yield return new WaitForSeconds(1f);
+            }
+
             _fsm.ChangeState(RunnerState.Playing);
         }
 
@@ -38,8 +40,9 @@ namespace MiniGames.EndlessRunner
 
         public void Exit()
         {
-            _game.DisableCoundownScreen();
+            _ui.HidePanel("CountdownScreen");
         }
     }
+
 
 }

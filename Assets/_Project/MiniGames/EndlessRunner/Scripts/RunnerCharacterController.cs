@@ -1,219 +1,205 @@
 ﻿using MiniGames.EndlessRunner;
 using UnityEngine;
 
-
 [RequireComponent(typeof(CharacterController))]
 public class RunnerCharacterController : MonoBehaviour
 {
-    [Header("Controls")]
-    public float jumpLength = 2.0f; 
-    public float jumpHeight = 1.2f; 
-    public float laneOffset = 1.0f; 
-    public float laneChangeSpeed = 1.0f;
-    public float slideLength = 2.0f;
+    [Header("Movement Settings")]
+    [SerializeField] private float jumpLength = 2.0f;
+    [SerializeField] private float jumpHeight = 1.2f;
+    [SerializeField] private float laneOffset = 1.0f;
+    [SerializeField] private float laneChangeSpeed = 1.0f;
+    [SerializeField] private float slideLength = 2.0f;
+
+    [SerializeField] private float minSpeed = 5.0f;
+    [SerializeField] private float maxSpeed = 10.0f;
+    [SerializeField] private float acceleration = .1f;
+
+    private int _currentLane = 1;
+    private Vector3 _targetPosition;
+    private float _speed;
     
-    public float minSpeed = 5.0f;
-    public float maxSpeed = 10.0f;
-    public float acceleration = .1f;
-    
-    protected int m_CurrentLane = 1;
-    protected Vector3 m_TargetPosition = Vector3.zero;
+    private bool _isMoving;
+    private bool _isRunning;
+    private bool _isJumping;
+    private float _jumpStartZ;
 
-    protected float m_Speed;
+    private bool _isSliding;
+    private float _slideStartZ;
+    private bool _isSwiping;
+    private Vector2 _touchStart;
 
-    protected bool m_Jumping;
-    protected float m_JumpStart;
+    private CharacterController _controller;
 
-    protected bool m_Sliding;
-    protected float m_SlideStart;
-
-    protected bool m_IsMoving;
-    protected bool m_IsRunning;
-    protected bool m_IsInvincible;
-
-    protected Vector3 m_MoveDirection = Vector3.zero;
-    protected UnityEngine.CharacterController m_Controller;
-
-    protected Vector2 m_StartingTouch;
-    protected bool m_IsSwiping = false;
-
-    public float speed => m_Speed;
-    public float speedRatio => (m_Speed - minSpeed) / (maxSpeed - minSpeed);
-    public bool isJumping => m_Jumping;
-    public bool isSliding => m_Sliding;
-    public bool isMoving => m_IsMoving;
+    public float Speed => _speed;
+    public float SpeedRatio => (_speed - minSpeed) / (maxSpeed - minSpeed);
+    public bool IsJumping => _isJumping;
+    public bool IsSliding => _isSliding;
+    public bool IsMoving => _isMoving;
 
     private void Awake()
     {
-        m_Controller = GetComponent<UnityEngine.CharacterController>();
+        _controller = GetComponent<CharacterController>();
     }
+
     private void Start()
     {
-        m_Speed = minSpeed;
+        ResetSpeed();
+        _targetPosition = transform.position;
     }
+
     private void Update()
     {
-        if (!m_IsMoving) return;
+        if (!_isMoving) return;
 
-        HandleInput();
+        HandleSwipeInput();
+        MoveCharacter();
+        UpdateJump();
+        UpdateSlide();
+    }
 
-        float scaledSpeed = m_Speed * Time.deltaTime;
-        Vector3 currentPosition = transform.position;
-        
-        float targetX = m_TargetPosition.x;
-        float smoothedX = Mathf.Lerp(currentPosition.x, targetX, Time.deltaTime * laneChangeSpeed);
-        
-        Vector3 desiredPosition = new Vector3(smoothedX, currentPosition.y, currentPosition.z + scaledSpeed);
-        
-        if (m_Jumping)
+    private void MoveCharacter()
+    {
+        float moveStep = _speed * Time.deltaTime;
+        Vector3 current = transform.position;
+        float targetX = Mathf.Lerp(current.x, _targetPosition.x, laneChangeSpeed * Time.deltaTime);
+        Vector3 desired = new Vector3(targetX, current.y, current.z + moveStep);
+
+        _controller.Move(desired - current);
+        _speed = Mathf.Min(_speed + acceleration * Time.deltaTime, maxSpeed);
+    }
+
+    private void UpdateJump()
+    {
+        if (!_isJumping) return;
+
+        float progress = (transform.position.z - _jumpStartZ) / (jumpLength * (1.0f + SpeedRatio));
+        if (progress >= 1f)
         {
-            float jumpProgress = (currentPosition.z - m_JumpStart) / (jumpLength * (1.0f + speedRatio));
-            if (jumpProgress >= 1.0f)
-            {
-                StopJumping();
-            }
-            else
-            {
-                desiredPosition.y = Mathf.Sin(Mathf.PI * jumpProgress) * jumpHeight;
-            }
+            _isJumping = false;
+            return;
         }
-        
-        if (m_Sliding && currentPosition.z - m_SlideStart > slideLength)
+
+        float yOffset = Mathf.Sin(Mathf.PI * progress) * jumpHeight;
+        var pos = transform.position;
+        transform.position = new Vector3(pos.x, yOffset, pos.z);
+    }
+
+    private void UpdateSlide()
+    {
+        if (_isSliding && transform.position.z - _slideStartZ > slideLength)
         {
             StopSliding();
         }
-        
-        m_Controller.Move(desiredPosition - currentPosition);
-        
-        m_Speed += acceleration * Time.deltaTime;
     }
-    private void HandleInput()
+
+    private void HandleSwipeInput()
     {
-        if (Input.touchCount == 1)
+        if (Input.touchCount != 1) return;
+
+        var touch = Input.GetTouch(0);
+        if (touch.phase == TouchPhase.Began)
         {
-            if (m_IsSwiping)
+            _touchStart = touch.position;
+            _isSwiping = true;
+        }
+
+        if (touch.phase == TouchPhase.Ended)
+        {
+            _isSwiping = false;
+        }
+
+        if (_isSwiping)
+        {
+            Vector2 delta = (touch.position - _touchStart) / Screen.width;
+            if (delta.magnitude < 0.01f) return;
+
+            _isSwiping = false;
+
+            if (Mathf.Abs(delta.y) > Mathf.Abs(delta.x))
             {
-                Vector2 diff = Input.GetTouch(0).position - m_StartingTouch;
-                diff = new Vector2(diff.x / Screen.width, diff.y / Screen.width);
-
-                if (diff.magnitude > 0.01f)
-                {
-                    if (Mathf.Abs(diff.y) > Mathf.Abs(diff.x))
-                    {
-                        if (diff.y < 0) Slide();
-                        else Jump();
-                    }
-                    else
-                    {
-                        if (diff.x < 0) ChangeLane(-1);
-                        else ChangeLane(1);
-                    }
-
-                    m_IsSwiping = false;
-                }
+                if (delta.y > 0) Jump();
+                else Slide();
             }
-
-            if (Input.GetTouch(0).phase == TouchPhase.Began)
+            else
             {
-                m_StartingTouch = Input.GetTouch(0).position;
-                m_IsSwiping = true;
-            }
-            else if (Input.GetTouch(0).phase == TouchPhase.Ended)
-            {
-                m_IsSwiping = false;
+                if (delta.x > 0) ChangeLane(1);
+                else ChangeLane(-1);
             }
         }
     }
+
     public void Jump()
     {
-        Debug.Log("Jump");
-        if (!m_IsRunning || m_Jumping) return;
+        if (!_isRunning || _isJumping) return;
 
-        if (m_Sliding) StopSliding();
-
-        float correctJumpLength = jumpLength * (1.0f + speedRatio);
-        m_JumpStart = transform.position.z;
-        m_Jumping = true;
+        StopSliding();
+        _isJumping = true;
+        _jumpStartZ = transform.position.z;
     }
+
     public void Slide()
     {
-        Debug.Log("Slide");
-        if (!m_IsRunning || m_Sliding) return;
+        if (!_isRunning || _isSliding) return;
 
-        if (m_Jumping) StopJumping();
-
-        m_Sliding = true;
-        m_SlideStart = transform.position.z;
-        HandleCollider();
+        StopJumping();
+        _isSliding = true;
+        _slideStartZ = transform.position.z;
+        AdjustCollider(forSlide: true);
     }
-    public void ChangeLane(int direction)
-    {
-        Debug.Log(direction == 1 ? "Right" : "Left");
-        Debug.Log("target lane: " + (m_CurrentLane + direction));
-        
-        if (!m_IsRunning) return;
 
-        int targetLane = m_CurrentLane + direction;
-        if (targetLane < 0 || targetLane > 2) return;
-
-        m_CurrentLane = targetLane;
-        m_TargetPosition = new Vector3((m_CurrentLane - 1) * laneOffset, 0, 0);
-    }
-    public void StopJumping() => m_Jumping = false;
+    public void StopJumping() => _isJumping = false;
 
     public void StopSliding()
     {
-        m_Sliding = false;
-        HandleCollider();
+        _isSliding = false;
+        AdjustCollider(forSlide: false);
     }
 
-    private void HandleCollider()
+    public void ChangeLane(int direction)
     {
-        if (m_Sliding)
-        {
-            m_Controller.height = 1.0f;
-            m_Controller.center = new Vector3(0, 0.5f, 0);
-        }
-        else
-        {
-            m_Controller.height = 2.0f;
-            m_Controller.center = new Vector3(0, 1f, 0);
-        }
+        if (!_isRunning) return;
+
+        int targetLane = _currentLane + direction;
+        if (targetLane < 0 || targetLane > 2) return;
+
+        _currentLane = targetLane;
+        _targetPosition = new Vector3((_currentLane - 1) * laneOffset, 0, 0);
+    }
+
+    private void AdjustCollider(bool forSlide)
+    {
+        _controller.height = forSlide ? 1.0f : 2.0f;
+        _controller.center = new Vector3(0, forSlide ? 0.5f : 1.0f, 0);
     }
 
     public void EnableControl()
     {
-        m_IsMoving = true;
-        m_IsRunning = true;
+        _isMoving = true;
+        _isRunning = true;
     }
 
     public void DisableControl()
     {
-        m_IsMoving = false;
-        m_IsRunning = false;
+        _isMoving = false;
+        _isRunning = false;
         StopJumping();
         StopSliding();
     }
-    
-    // TODO: Event system
+
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (!m_IsInvincible && hit.gameObject.CompareTag("Obstacle"))
+        if (hit.gameObject.CompareTag("Obstacle"))
         {
-            FindObjectOfType<RunnerGame>()?.OnDeath();
+            FindObjectOfType<RunnerGame>()?.OnDeath(); // TODO: Event'e dönüştür
         }
-        if (hit.gameObject.TryGetComponent(out Coin coin))
+        else if (hit.gameObject.TryGetComponent(out Coin coin))
         {
             coin.Collect();
         }
     }
-    public void ResetSpeed()
-    {
-        m_Speed = minSpeed;
-    }
 
-    public void ResetPosisition()
-    {
-        transform.position = new Vector3(0, 0, 0);
-    }
+    public void ResetSpeed() => _speed = minSpeed;
+
+    public void ResetPosisition() => transform.position = Vector3.zero;
 }

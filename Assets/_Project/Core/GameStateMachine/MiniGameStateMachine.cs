@@ -36,6 +36,12 @@ namespace Core.GameStateMachine
         }
 
         public bool HasState(T key) => _states.ContainsKey(key);
+        
+        public void UnRegisterStates()
+        {
+            _states.Clear();
+            _currentState = null;
+        }
 
         public IEnumerable<T> RegisteredKeys => _states.Keys;
     }

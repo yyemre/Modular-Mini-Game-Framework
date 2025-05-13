@@ -44,4 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b85c3e0b2cc044f7b42b1f55848c8161, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panelRegistry: {fileID: 11400000, guid: 30e61170e0ca6fc479b9ee493f771514, type: 2}
+  textBindings: []
