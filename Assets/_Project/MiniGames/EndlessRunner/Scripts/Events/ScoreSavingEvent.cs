@@ -1,6 +1,4 @@
-﻿using UnityEditor.Overlays;
-
-namespace MiniGames.EndlessRunner
+﻿namespace MiniGames.EndlessRunner
 {
     public class ScoreSavingEvent { }
 }
