@@ -1,33 +1,62 @@
-﻿using UnityEngine;
-using TMPro;
+﻿using System;
+using Core.EventSystem;
+using UnityEngine;
+using Zenject;
+using Infrastructure.SaveSystem;
 
 namespace MiniGames.EndlessRunner
 {
     public class ScoreManager : MonoBehaviour
     {
-        [SerializeField] private TMP_Text scoreText;
+        [Inject] private IEventBus _eventBus;
+        [Inject] private ISaveSystem _saveSystem;
 
         private int currentScore;
 
-        public void AddScore(int value)
+        private void OnEnable()
         {
-            currentScore += value;
-            UpdateUI();
+            _eventBus.Subscribe<ScoreAddingEvent>(AddScore);
+            _eventBus.Subscribe<ScoreResetEvent>(ResetScore);
+            _eventBus.Subscribe<ScoreSavingEvent>(SaveScore);
+            _eventBus.Subscribe<PublishHighScoreEvent>(PublishHighScore);
+        }
+
+        public void AddScore(ScoreAddingEvent e)
+        {
+            currentScore += e.PointToAdd;
+            PublishScore();
         }
 
         public int GetScore() => currentScore;
-        
-        // TODO: Event system
-        private void UpdateUI()
-        {
-            if (scoreText != null)
-                scoreText.text = $"Score: {currentScore}";
-        }
 
-        public void ResetScore()
+        public void ResetScore(ScoreResetEvent e)
         {
             currentScore = 0;
-            UpdateUI();
+            PublishScore();
         }
+
+        private void PublishScore()
+        {
+            _eventBus.Publish(new ScoreChangedEvent(currentScore));
+        }
+
+        private void SaveScore(ScoreSavingEvent e)
+        {
+            var save = _saveSystem.Load();
+            if (save.runnerData.highScore < currentScore)
+            {
+                save.runnerData.highScore = currentScore;
+                _saveSystem.Save(save);
+            }
+            
+            PublishHighScore(null);
+        }
+
+        private void PublishHighScore(PublishHighScoreEvent e)
+        {
+            var save = _saveSystem.Load();
+            _eventBus.Publish(new HighScoreDisplayEvent(save.runnerData.highScore));
+        }
+        
     }
 }

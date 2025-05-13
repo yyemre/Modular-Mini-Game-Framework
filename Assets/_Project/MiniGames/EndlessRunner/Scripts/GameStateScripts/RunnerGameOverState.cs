@@ -1,29 +1,25 @@
-﻿using System.Collections;
+﻿using Core.EventSystem;
 using Core.GameStateMachine;
 using UnityEngine;
+using Zenject;
 
 namespace MiniGames.EndlessRunner
 {
     public class RunnerGameOverState : IMiniGameState
     {
         private readonly RunnerGame _game;
+        private readonly IEventBus _eventBus;
 
-        public RunnerGameOverState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game)
+        public RunnerGameOverState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game, IEventBus EventBus)
         {
             _game = game;
+            _eventBus = EventBus;
         }
 
         public void Enter()
         {
             Debug.Log("Game State: GameOver");
             _game.EnableGameOverScreen();
-            
-            // TODO: score yazılacak
-            
-            // var score = _game.GetScoreManager().CurrentScore;
-            // GameManager.Instance.SaveSystem.Save("runner_score", score);
-            //
-            // UIManager.Instance.ShowScreen<GameOverScreen>();
         }
 
         public void Tick() { }
@@ -31,6 +27,7 @@ namespace MiniGames.EndlessRunner
         public void Exit()
         {
             _game.DisableGameOverScreen();
+            _eventBus.Publish(new ScoreChangedEvent(0));
         }
     }
 

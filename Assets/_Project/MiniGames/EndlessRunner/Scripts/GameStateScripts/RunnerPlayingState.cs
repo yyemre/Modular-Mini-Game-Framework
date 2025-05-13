@@ -20,16 +20,12 @@ namespace MiniGames.EndlessRunner
             Debug.Log("Game State: Playing");
              _game.GetCharacter().EnableControl();
              _game.EnablePlayingScreen();
-            // _game.GetSpawner().StartSpawning();
-            // _game.GetScoreManager().StartScoring();
         }
 
         public void Tick() { }
         public void Exit()
         {
             _game.GetCharacter().DisableControl();
-            _game.DisablePlayingScreen();
-            // _game.GetSpawner().StopSpawning();
         }
     }
 

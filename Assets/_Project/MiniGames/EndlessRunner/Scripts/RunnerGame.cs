@@ -1,15 +1,15 @@
-﻿using UnityEngine;
+﻿using Core.EventSystem;
+using UnityEngine;
 using Core.MiniGame;
 using Core.GameStateMachine;
 using TMPro;
+using Zenject;
 
 namespace MiniGames.EndlessRunner
 {
     public class RunnerGame : MiniGameBase<RunnerState>
     {
-        // [SerializeField] private RunnerController runner;
-        // [SerializeField] private ObstacleSpawner spawner;
-        // [SerializeField] private ScoreManager scoreManager;
+        [Inject] private IEventBus _eventBus;
         
         [ContextMenu("Show Current State")]
         public void DebugCurrentState()
@@ -30,11 +30,11 @@ namespace MiniGames.EndlessRunner
         public override void RegisterStates(MiniGameStateMachine<RunnerState> machine)
         {
             machine.RegisterState(RunnerState.Loading, new RunnerLoadingState(machine, this));
-            machine.RegisterState(RunnerState.Ready, new RunnerReadyState(machine, this));
+            machine.RegisterState(RunnerState.Ready, new RunnerReadyState(machine, this, _eventBus));
             machine.RegisterState(RunnerState.Countdown, new RunnerCountdownState(machine, this));
             machine.RegisterState(RunnerState.Playing, new RunnerPlayingState(machine, this));
-            machine.RegisterState(RunnerState.Crashed, new RunnerCrashedState(machine, this));
-            machine.RegisterState(RunnerState.GameOver, new RunnerGameOverState(machine, this));
+            machine.RegisterState(RunnerState.Crashed, new RunnerCrashedState(machine, this, _eventBus));
+            machine.RegisterState(RunnerState.GameOver, new RunnerGameOverState(machine, this, _eventBus));
         }
 
         public override void OnGameStart()
@@ -100,10 +100,19 @@ namespace MiniGames.EndlessRunner
         {
             coundownScreen.SetActive(false);
         }
-
         public void SetCountDown(int seconds)
         {
             countdownText.text = seconds.ToString();
+        }
+        
+        [SerializeField] GameObject readyScreen;
+        public void EnableReadyScreen()
+        {
+            readyScreen.SetActive(true);
+        }
+        public void DisableReadyScreen()
+        {
+            readyScreen.SetActive(false);
         }
         #endregion
         // public RunnerController GetRunner() => runner;

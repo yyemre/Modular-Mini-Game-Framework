@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Core.EventSystem;
 using Core.GameStateMachine;
 using UnityEngine;
 
@@ -8,18 +9,20 @@ namespace MiniGames.EndlessRunner
     {
         private readonly MiniGameStateMachine<RunnerState> _fsm;
         private readonly RunnerGame _game;
+        private readonly IEventBus _eventBus;
 
-        public RunnerCrashedState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game)
+        public RunnerCrashedState(MiniGameStateMachine<RunnerState> fsm, RunnerGame game, IEventBus EventBus)
         {
             _fsm = fsm;
             _game = game;
+            _eventBus = EventBus;
         }
 
         public void Enter()
         {
             Debug.Log("Game State: Crashed");
+            _eventBus.Publish(new ScoreSavingEvent());
             _game.GetCharacter().DisableControl();
-            // _game.GetSpawner().StopSpawning();
             _game.StartCoroutine(WaitAndGoToGameOver());
         }
 
